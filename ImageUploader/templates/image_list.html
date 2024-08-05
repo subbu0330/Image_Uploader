@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image List</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            padding: 20px;
+            /* display: flex; */
+            align-items: center;
+            /* justify-content: space-between; */
+        }
+        img {
+            border-radius: 10px;
+        }
+        button {
+            background-color: #6200ea;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #3700b3;
+        }
+        a {
+            display: block;
+            margin: 20px auto;
+            width: fit-content;
+            color: #6200ea;
+            text-decoration: none;
+            font-size: 18px;
+        }
+        a:hover {
+            color: #3700b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Uploaded Images</h1>
+    <ul>
+        {% for image in images %}
+            <li>
+                <img src="{{ image.image.url }}" width="700" height="500" alt="{{ image.image.name }}">
+                <form action="{% url 'delete_image' image.pk %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit">Delete</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'image_upload' %}">Click here to upload images</a>
+</body>
+</html>

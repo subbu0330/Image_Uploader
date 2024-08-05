@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Images</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        h1 {
+            color: #ffffff;
+        }
+        #paste-area, #upload-area {
+            border: 2px dashed #777;
+            background-color: #1e1e1e;
+            width: 80%;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        button {
+            background-color: #6200ea;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        button:hover {
+            background-color: #3700b3;
+        }
+        form {
+            width: 80%;
+        }
+        input[type="file"] {
+            color: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload Images</h1>
+    <div id="paste-area">Paste your image here</div>
+    <button id="paste-upload-button">Upload Pasted Image</button>
+    
+    <div id="upload-area">
+        <form method="post" enctype="multipart/form-data" id="file-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Upload Selected Files</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const pasteArea = document.getElementById('paste-area');
+            const pasteUploadButton = document.getElementById('paste-upload-button');
+            let pastedFile = null;
+            const csrfToken = '{{ csrf_token }}';
+
+            pasteArea.addEventListener('paste', function(event) {
+                const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+                for (let index in items) {
+                    const item = items[index];
+                    if (item.kind === 'file' && item.type.indexOf('image') !== -1) {
+                        pastedFile = item.getAsFile();
+                        pasteArea.textContent = 'Image ready to upload';
+                    }
+                }
+            });
+
+            pasteUploadButton.addEventListener('click', function() {
+                if (pastedFile) {
+                    const formData = new FormData();
+                    formData.append('image', pastedFile);
+                    formData.append('csrfmiddlewaretoken', csrfToken);
+
+                    fetch("{% url 'image_upload' %}", {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        if (data.success) {
+                            window.location.href = "{% url 'image_list' %}";
+                        } else {
+                            alert('Failed to upload image');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Error uploading image');
+                    });
+                } else {
+                    alert('No image pasted');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
